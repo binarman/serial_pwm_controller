@@ -1,0 +1,13 @@
+[Unit]
+Description=PWM controller over serial port
+StartLimitIntervalSec=30
+StartLimitBurst=10
+
+[Service]
+Type=exec
+Restart=always
+RestartSec=2
+ExecStart=/usr/bin/env python3 /usr/bin/serial_pwm
+
+[Install]
+WantedBy=multi-user.target
