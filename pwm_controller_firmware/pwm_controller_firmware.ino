@@ -42,9 +42,14 @@ int parity_bit(int value) {
 }
 
 unsigned long last_set_time;
+uint16_t current_duty_cycle = 0xffff;
 
-void setDutyCycle(uint16_t dutyCycle) {
+void setDutyCycle(uint16_t duty_cycle) {
   last_set_time = millis();
+  // do nothing is duty cycle did not change
+  if (duty_cycle == current_duty_cycle)
+    return;
+  current_duty_cycle = duty_cycle;
 #if defined(__AVR_ATmega328P__)
 
   uint8_t sreg = SREG;
@@ -91,10 +96,10 @@ void setDutyCycle(uint16_t dutyCycle) {
   // been configured with Fast PWM is wrong.
 
   // Set duty cycle
-  if (dutyCycle >= (1 << PWM_RESOLUTION) - 1)
+  if (duty_cycle >= (1 << PWM_RESOLUTION) - 1)
     OCR1A = cycles_per_iteration;
   else
-    OCR1A = ((uint32_t)dutyCycle * cycles_per_iteration) / (1 << PWM_RESOLUTION);
+    OCR1A = ((uint32_t)duty_cycle * cycles_per_iteration) / (1 << PWM_RESOLUTION);
   //OCR1B = 0xBFFF;
 
   // 14.4.3 DDRB – The Port B Data Direction Register
@@ -109,11 +114,11 @@ void setDutyCycle(uint16_t dutyCycle) {
 
 #endif
 #if defined(ESP32)
-  bool res = ledcWrite(OUTPUT_PIN, dutyCycle);
+  bool res = ledcWrite(OUTPUT_PIN, duty_cycle);
   assert(res);
 #endif
   Serial.print("duty cycle: ");
-  Serial.print(dutyCycle);
+  Serial.print(duty_cycle);
   Serial.print("\n");
 }
 
